@@ -5,6 +5,7 @@ import VoiceScreen from './VoiceScreen';
 import { useRef } from "react";
 import useAppContext from "../app-context/useAppContext";
 import { uuidv4 } from "../../util";
+import GlobalDataHelper from "../helpers/GlobalDataHelper";
 var RNFS = require('react-native-fs');
 
 type TypePamrams = {
@@ -20,7 +21,16 @@ const AuthenVoiceScreen = ({ route, navigation }) => {
     const [textUser, settextUser] = useState("shbbank");
     const [textPass, settextPass] = useState("51el9#2TilXO");
     const { context } = useAppContext({});
-    const [ip, setIp] = useState(context.ip);
+    const [ip, setIp] = useState("http://13.214.25.203:7001");
+
+    useEffect(() => {
+        _initData();
+    }, [])
+
+    const _initData = async () => {
+        let ip = await GlobalDataHelper.getIp();
+        if (ip) setIp(ip);
+    }
 
     const type = useRef(1)
     const dataParams = useRef<TypePamrams[]>([{
@@ -48,7 +58,7 @@ const AuthenVoiceScreen = ({ route, navigation }) => {
     }
 
     const getToken = async () => {
-        context.changeIp(ip);
+        await GlobalDataHelper.saveIp(ip);
         context.changeUuid(uuidv4());
         setDisableButton(true)
         await axios(getConfig("auth/login", {

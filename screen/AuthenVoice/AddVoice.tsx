@@ -98,7 +98,7 @@ const AuthenVoiceScreen = ({ route, navigation }) => {
     const verifyFpt = async (type, result): Promise<VerifyVoiceResult | undefined> => {
         setBtnVerifyVoiceEnable(false);
         const base64 = await RNFS.readFile(result, 'base64');
-        const params = { 'audio': base64, 'id': idVoice + "" }; console.log("params", params);
+        const params = { 'audio': base64, 'id': idVoice + "" }; console.log("VERIFY PARAMS", params);
         var configV = {
             method: 'post',
             url: 'https://api-services.nextg.team/api/v1/voices/verify',
@@ -108,6 +108,7 @@ const AuthenVoiceScreen = ({ route, navigation }) => {
             },
             data: params
         };
+        console.log(axios(configV));
 
         try {
             let response = await axios(configV);
@@ -189,7 +190,7 @@ const AuthenVoiceScreen = ({ route, navigation }) => {
             const base64_2 = await RNFS.readFile(dataParams.current[1].url, 'base64')
             const base64_3 = await RNFS.readFile(dataParams.current[2].url, 'base64')
             // const params = { 'audios': [base64_1, base64_2, base64_3], 'code': (new Date()).getTime(), 'name': 'shbbank' }
-            const params = { 'audios': [base64_1, base64_2, base64_3], 'code': ((new Date()).getTime()) + "", 'name': 'shbbank' }
+            const params = { 'audios': [base64_1, base64_2, base64_3], 'code': ((new Date()).getTime()) + "", 'name': 'shbbank' }; console.log("ADD VOICE PARAMS", params);
             var config = {
                 method: 'post',
                 url: 'https://api-services.nextg.team/api/v1/voices',

@@ -113,6 +113,7 @@ interface State {
   playTime: string;
   duration: string;
   isProcessingSpeechToText: boolean;
+  recording: boolean;
 }
 
 const screenWidth = Dimensions.get('screen').width;
@@ -134,7 +135,8 @@ class Page extends Component<any, State> {
       currentDurationSec: 0,
       playTime: '00:00:00',
       duration: '00:00:00',
-      isProcessingSpeechToText: false
+      isProcessingSpeechToText: false,
+      recording: false
     };
 
     this.audioRecorderPlayer = new AudioRecorderPlayer();
@@ -146,7 +148,7 @@ class Page extends Component<any, State> {
   }
 
   componentDidMount(): void {
-    this.onStartRecord()
+    // this.onStartRecord()
   }
 
   public render() {
@@ -181,15 +183,8 @@ class Page extends Component<any, State> {
       //   </View>
       // </SafeAreaView>
 
-      <View style={{
-        backgroundColor: 'white',
-        padding: 15,
-        paddingHorizontal: 24,
-        borderRadius: 12,
-        alignItems: "center",
-      }}>
-        {/* <Text>{"Đang ghi âm..."}</Text> */}
-        {!this.state.isProcessingSpeechToText && <Spinner type="Wave" isVisible color="#0066ff" />}
+      <View style={{ paddingBottom: 10 }}>
+        {this.state.recording && <Spinner type="Wave" isVisible color="#0066ff" />}
         {this.state.isProcessingSpeechToText && <View style={{
           alignItems: "center"
         }}>
@@ -197,7 +192,7 @@ class Page extends Component<any, State> {
           <Spinner type="ThreeBounce" isVisible color="#0066ff" />
         </View>}
 
-        <TouchableOpacity onPress={this.onStopRecord} style={{
+        {/* <TouchableOpacity onPress={this.onStopRecord} style={{
           backgroundColor: '#0066ff',
           borderRadius: 8,
           paddingHorizontal: 12,
@@ -209,12 +204,15 @@ class Page extends Component<any, State> {
           <Text style={{
             color: 'white'
           }}>{"Dừng"}</Text>
-        </TouchableOpacity>
+        </TouchableOpacity> */}
       </View>
     );
   }
 
-  private onStartRecord = async () => {
+  public onStartRecord = async () => {
+    this.setState({
+      recording: true
+    })
     if (Platform.OS === 'android') {
       try {
         const grants = await PermissionsAndroid.requestMultiple([
@@ -283,8 +281,9 @@ class Page extends Component<any, State> {
     console.log(`uri: ${uri}`);
   };
 
-  private onStopRecord = async () => {
+  public onStopRecord = async () => {
     this.setState({
+      recording: false,
       isProcessingSpeechToText: true
     })
     const result = await this.audioRecorderPlayer.stopRecorder();

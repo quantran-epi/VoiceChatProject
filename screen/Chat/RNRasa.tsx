@@ -1,24 +1,18 @@
-import React, { useState, useCallback, useEffect, useMemo, useRef } from 'react';
-import { View, Image, TouchableOpacity, Modal, Text, ToastAndroid } from 'react-native';
-
-import { GiftedChat } from 'react-native-gifted-chat';
 import Clipboard from '@react-native-clipboard/clipboard';
-
-import {
-  uuidv4,
-  createNewBotMessage,
-  createBotEmptyMessage,
-  fetchOptions,
-} from '../../util';
-import App1 from './App1';
-import Sound from 'react-native-sound'
 import axios from 'axios';
-import BottomSheet from '@gorhom/bottom-sheet'
-import useAppContext from '../app-context/useAppContext';
-import ContactChatHelper from '../helpers/ContactChatHelper';
-import RasaMessagePrefix from '../constants/RasaMessagePrefix';
 import uniqBy from 'lodash/uniqBy';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
+import { Image, Modal, Text, ToastAndroid, TouchableOpacity, View } from 'react-native';
+import { GiftedChat } from 'react-native-gifted-chat';
+import Sound from 'react-native-sound';
+import {
+  createBotEmptyMessage, createNewBotMessage, fetchOptions, uuidv4
+} from '../../util';
+import useAppContext from '../app-context/useAppContext';
+import RasaMessagePrefix from '../constants/RasaMessagePrefix';
+import ContactChatHelper from '../helpers/ContactChatHelper';
 import SavedIntraHelper from '../helpers/SavedIntraHelper';
+import App1 from './App1';
 
 //TODO: reset bot on destroy
 
@@ -39,12 +33,24 @@ const RNRasa = ({
   const [mute, setMute] = useState(true);
   console.log("idVoice:   ", idVoice);
   const { context } = useAppContext({});
-  console.log("uuid", context.uuid);
+  const [_uuid, _setUuid] = useState("");
+  const [_recording, _setRecording] = useState<boolean>(false);
+  const recorderRef = useRef<App1>();
 
   useEffect(() => {
-    sendMessage('hi');
+    _initData();
     ContactChatHelper.saveAllContact();
   }, [])
+
+  useEffect(() => {
+    if (_uuid)
+      sendMessage('hi');
+  }, [_uuid])
+
+  const _initData = async () => {
+    let uuid = uuidv4();
+    _setUuid(uuid);
+  }
 
   const convertString = (text) => {
     text = text.slice(0, -2)
@@ -88,7 +94,7 @@ const RNRasa = ({
     return normalMessages;
   }
 
-  const saveIntra = (message) => {
+  const saveIntra = (message: string) => {
     console.log("intra message from server", message);
     let splitText = message.split('$');
     if (splitText.length < 3) return;
@@ -103,7 +109,7 @@ const RNRasa = ({
     });
   }
 
-  const showIntraSuggesstion = async (command) => {
+  const showIntraSuggesstion = async (text: string) => {
     console.log('show intra suggestion', text);
     let splitText = text.split('$');
     let searchText = splitText[1]; console.log("search intra text", searchText);
@@ -127,7 +133,7 @@ const RNRasa = ({
     )
   }
 
-  const showContactSuggestion = async (text) => {
+  const showContactSuggestion = async (text: string) => {
     console.log('show contact suggestion', text);
     let splitText = text.split('$');
     if (splitText.length !== 2) return;
@@ -171,7 +177,7 @@ const RNRasa = ({
     async (text) => {
       const rasaMessageObj = {
         message: text,
-        sender: context.uuid,
+        sender: _uuid,
       };
       try {
         console.log('request', `${host}/webhooks/rest/webhook`);
@@ -253,9 +259,16 @@ const RNRasa = ({
     [userAvatar, sendMessage],
   );
 
-  const onPressVoice = () => {
-    console.log("vao day");
-    setVisible(true)
+  const onStartRecorder = () => {
+    // setVisible(true)
+    if (recorderRef.current) recorderRef.current.onStartRecord();
+    _setRecording(true);
+  }
+
+  const onStopRecorder = () => {
+    // setVisible(true)
+    if (recorderRef.current) recorderRef.current.onStopRecord();
+    _setRecording(false);
   }
 
   const onResultData = (data) => {
@@ -330,6 +343,52 @@ const RNRasa = ({
     setMute(!mute);
   }
 
+  const _renderVoiceRecorder = (): React.ReactNode => {
+    return <View style={{
+      alignItems: "center",
+      padding: 20,
+      backgroundColor: "transparent"
+    }}>
+      <App1 ref={recorderRef} onResultData={onResultData}
+        hideModel={hideModel}
+        // idVoice={idVoice}
+        idVoice={null}
+        token={token}
+      />
+      {_recording ? <TouchableOpacity
+        onPress={onStopRecorder}
+        style={{
+          width: 70, height: 70,
+          alignItems: 'center',
+          justifyContent: 'center',
+          backgroundColor: "#0066ff",
+          borderRadius: 1000,
+        }}>
+        <Image
+          source={require("../Demo/stop-recorder.png")}
+          style={{
+            width: 35, height: 35, tintColor: "#fff",
+          }}
+        />
+      </TouchableOpacity> : <TouchableOpacity
+        onPress={onStartRecorder}
+        style={{
+          width: 70, height: 70,
+          alignItems: 'center',
+          justifyContent: 'center',
+          backgroundColor: "#0066ff",
+          borderRadius: 1000,
+        }}>
+        <Image
+          source={require("../Demo/microphone.png")}
+          style={{
+            width: 35, height: 35, tintColor: "#fff",
+          }}
+        />
+      </TouchableOpacity>}
+    </View>
+  }
+
   return (
     <View style={{
       position: 'relative',
@@ -376,9 +435,6 @@ const RNRasa = ({
       </View>
 
       <GiftedChat
-        textInputStyle={{
-          paddingLeft: 35,
-        }}
         {...giftedChatProp}
         user={{
           _id: 1,
@@ -388,24 +444,8 @@ const RNRasa = ({
         messages={messages}
         onQuickReply={onQuickReply}
         onLongPress={onLongPress}
+        renderChatFooter={_renderVoiceRecorder}
       />
-      <TouchableOpacity
-        onPress={onPressVoice}
-        style={{
-          width: 50, height: 50,
-          position: 'absolute',
-          bottom: 0,
-          left: 0,
-          alignItems: 'center',
-          justifyContent: 'center'
-        }}>
-        <Image
-          source={require("../Demo/image_voice.png")}
-          style={{
-            width: 30, height: 30,
-          }}
-        />
-      </TouchableOpacity>
 
       <Modal transparent visible={visible} animationType={'fade'}>
         <View style={{
@@ -414,29 +454,6 @@ const RNRasa = ({
           justifyContent: 'center',
           backgroundColor: `rgba(0, 0, 0, ${0.6})`,
         }}>
-          {/* <View style={{
-            backgroundColor: 'white',
-            padding: 12,
-            paddingHorizontal: 24,
-            borderRadius: 12
-          }}>
-            <Text>{"Đang ghi âm..."}</Text>
-
-            <TouchableOpacity style={{
-              backgroundColor: '#0066ff',
-              borderRadius: 8,
-              paddingHorizontal: 12,
-              paddingVertical: 8,
-              justifyContent: 'center', 
-              alignItems: 'center',
-              marginTop: 20
-            }}>
-              <Text style={{
-                color: 'white'
-              }}>{"Dừng"}</Text>
-            </TouchableOpacity>
-          </View> */}
-
           <App1 onResultData={onResultData}
             hideModel={hideModel}
             // idVoice={idVoice}
