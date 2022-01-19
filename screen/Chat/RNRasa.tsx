@@ -349,8 +349,8 @@ const RNRasa = ({
       padding: 20,
       backgroundColor: "transparent"
     }}>
-      <App1 ref={recorderRef} onResultData={onResultData}
-        hideModel={hideModel}
+      <App1 ref={recorderRef}
+        onResultData={onResultData}
         // idVoice={idVoice}
         idVoice={null}
         token={token}
@@ -446,30 +446,6 @@ const RNRasa = ({
         onLongPress={onLongPress}
         renderChatFooter={_renderVoiceRecorder}
       />
-
-      <Modal transparent visible={visible} animationType={'fade'}>
-        <View style={{
-          flex: 1,
-          alignItems: 'center',
-          justifyContent: 'center',
-          backgroundColor: `rgba(0, 0, 0, ${0.6})`,
-        }}>
-          <App1 onResultData={onResultData}
-            hideModel={hideModel}
-            // idVoice={idVoice}
-            idVoice={null}
-            token={token}
-          />
-        </View>
-      </Modal>
-
-      {/* <BottomSheet
-        ref={bottomSheetRef}
-        // initialSnapIndex={1}
-        snapPoints={snapPoints}
-        onChange={handleSheetChanges}
-      >
-      </BottomSheet> */}
     </View>
   );
 };

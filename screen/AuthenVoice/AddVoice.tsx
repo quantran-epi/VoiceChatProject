@@ -299,6 +299,10 @@ const AuthenVoiceScreen = ({ route, navigation }) => {
         }
     }
 
+    const _hasVoiceAdded = (): boolean => {
+        return idVoice || _encodeKey;
+    }
+
     const saveData = async (text: string) => {
         try {
             await AsyncStorage.setItem(STORAGE_KEY, text)
@@ -328,6 +332,8 @@ const AuthenVoiceScreen = ({ route, navigation }) => {
                 item.url = result
             }
         })
+
+        if (_pagerIndex === 2) onAddVoice();
     }
 
     const onPressNext = async () => {
@@ -393,15 +399,22 @@ const AuthenVoiceScreen = ({ route, navigation }) => {
 
             <View style={styles.addVoiceContainer}>
 
-                <Text style={{
+                {!_hasVoiceAdded() ? <Text style={{
                     marginHorizontal: 35,
                     alignSelf: 'center',
                     textAlign: 'center',
                     marginTop: 50,
                     fontSize: 18,
-                }}>{"Nói 1 câu bất kỳ khoảng 5s"}</Text>
+                }}>{"Nói 1 câu bất kỳ khoảng 5s"}</Text> :
+                    <Text style={{
+                        marginHorizontal: 35,
+                        alignSelf: 'center',
+                        textAlign: 'center',
+                        marginTop: 50,
+                        fontSize: 18,
+                    }}>{"Xác thực giọng nói"}</Text>}
 
-                <PagerView style={styles.pagerView} initialPage={0} ref={pagerRef} scrollEnabled={false}>
+                {!_hasVoiceAdded() && <PagerView style={styles.pagerView} initialPage={0} ref={pagerRef} scrollEnabled={false}>
                     <View key="1" style={styles.addVoicePage}>
                         <TouchableOpacity
                             onPress={() => {
@@ -473,21 +486,7 @@ const AuthenVoiceScreen = ({ route, navigation }) => {
                             ? <Text style={styles.addVoiceMessageSuccess}>Lần thứ ba</Text> :
                             <Text style={styles.addVoiceMessage}>Lần thứ ba</Text>}
                     </View>
-                    <View key="4" style={styles.addVoicePage}>
-                        <TouchableOpacity
-                            onPress={onAddVoice}
-                            // disabled={disableBtnAddVoice}
-                            style={{
-                                ...styles.addVoiceStepButton,
-                            }}>
-                            <Image
-                                style={styles.styleImage1}
-                                source={require("../Demo/save.png")}
-                            />
-                        </TouchableOpacity>
-                        <Text style={styles.addVoiceMessage}>{disableBtnAddVoice ? "Vui lòng chờ" : "Hoàn thành"}</Text>
-                    </View>
-                </PagerView>
+                </PagerView>}
 
                 {/* <View style={{
                     flexDirection: 'row',
@@ -539,29 +538,30 @@ const AuthenVoiceScreen = ({ route, navigation }) => {
                     </TouchableOpacity>
                 </View> */}
 
-                <View style={{
+                {_hasVoiceAdded() && <View style={{
                     paddingHorizontal: 12,
                     flexDirection: "row",
-                    justifyContent: "space-between",
+                    justifyContent: "center",
                     width: Dimensions.get('window').width,
                     paddingVertical: 30,
                 }}>
-                    {/* <TouchableOpacity
-                        onPress={addVoice}
-                        // disabled={disableBtnAddVoice}
-                        style={styles.viewStyles}
-                    >
-                        <Text style={{ color: 'white' }}>{disableBtnAddVoice ? "Vui lòng chờ" : "Hoàn thành"}</Text>
-                    </TouchableOpacity> */}
-
                     <TouchableOpacity
                         onPress={verifyVoice}
-                        // disabled={disableBtnAddVoice}
-                        style={styles.viewStyles}
-                    >
-                        <Text style={{ color: 'white' }}>{!btnVerifyVoiceEnable ? "Vui lòng chờ" : "Xác thực"}</Text>
+                        style={styles.btnVerifyContainer}>
+                        <View style={styles.btnVerify}>
+                            <Image source={require("../Demo/microphone.png")} style={{ width: 35, height: 35, tintColor: "white" }} />
+                        </View>
+                        <Text style={{ fontWeight: "bold", color: "#000" }}>Giọng thật</Text>
                     </TouchableOpacity>
-                </View>
+                    <TouchableOpacity
+                        onPress={verifyVoice}
+                        style={styles.btnVerifyContainer}>
+                        <View style={styles.btnVerify}>
+                            <Image source={require("../Demo/microphone.png")} style={{ width: 35, height: 35, tintColor: "white" }} />
+                        </View>
+                        <Text style={{ fontWeight: "bold" }}>Giọng giả</Text>
+                    </TouchableOpacity>
+                </View>}
 
                 <Modal transparent visible={visible} animationType={'fade'}>
                     <View style={{
@@ -748,6 +748,19 @@ const styles = StyleSheet.create({
         color: "#f21361"
     },
     addVoiceResultMessage: {
+    },
+    btnVerify: {
+        backgroundColor: "#0066ff",
+        borderRadius: 1000,
+        alignItems: 'center',
+        width: 80,
+        height: 80,
+        justifyContent: "center",
+        marginVertical: 10,
+        marginHorizontal: 20
+    },
+    btnVerifyContainer: {
+        alignItems: "center"
     }
 })
 
