@@ -183,12 +183,13 @@ class Page extends Component<any, State> {
       //   </View>
       // </SafeAreaView>
 
-      <View style={{ paddingBottom: 10 }}>
+      <View style={[{ alignItems: "center", justifyContent: "center" }, (this.state.recording || this.state.isProcessingSpeechToText) ? { flex: 1 } : {}]}>
         {this.state.recording && <Spinner type="Wave" isVisible color="#0066ff" />}
         {this.state.isProcessingSpeechToText && <View style={{
-          alignItems: "center"
+          alignItems: "center",
+          flexDirection: "row",
         }}>
-          <Text>Đang xử lý</Text>
+          <Text style={{ marginRight: 10 }}>Đang xử lý</Text>
           <Spinner type="ThreeBounce" isVisible color="#0066ff" />
         </View>}
 

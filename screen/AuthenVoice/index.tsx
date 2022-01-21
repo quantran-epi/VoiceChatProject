@@ -6,6 +6,7 @@ import { useRef } from "react";
 import useAppContext from "../app-context/useAppContext";
 import { uuidv4 } from "../../util";
 import GlobalDataHelper from "../helpers/GlobalDataHelper";
+import StringeeChat from "../Chat/StringeeChat";
 var RNFS = require('react-native-fs');
 
 type TypePamrams = {
@@ -22,6 +23,19 @@ const AuthenVoiceScreen = ({ route, navigation }) => {
     const [textPass, settextPass] = useState("51el9#2TilXO");
     const { context } = useAppContext({});
     const [ip, setIp] = useState("http://13.214.25.203:7001");
+
+    const eventHandlers = useRef({
+        onConnect: () => { },
+        onDisConnect: () => { },
+        onFailWithError: () => { },
+        onRequestAccessToken: () => { },
+        onCustomMessage: () => { },
+        onObjectChange: () => { },
+        onTimeoutInQueue: () => { },
+        onConversationEnded: () => { },
+        onUserBeginTyping: () => { },
+        onUserEndTyping: () => { },
+    })
 
     useEffect(() => {
         _initData();
@@ -115,6 +129,8 @@ const AuthenVoiceScreen = ({ route, navigation }) => {
                 backgroundColor: "white",
                 flex: 1
             }}>
+
+                <StringeeChat />
                 <View style={styles.logo}>
                     <Image style={{
                         width: 220,

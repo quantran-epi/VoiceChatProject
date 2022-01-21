@@ -3,7 +3,8 @@ import axios from 'axios';
 import uniqBy from 'lodash/uniqBy';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { Image, Modal, Text, ToastAndroid, TouchableOpacity, View } from 'react-native';
-import { GiftedChat } from 'react-native-gifted-chat';
+import { TextInput } from 'react-native-gesture-handler';
+import { ComposerProps, GiftedChat } from 'react-native-gifted-chat';
 import Sound from 'react-native-sound';
 import {
   createBotEmptyMessage, createNewBotMessage, fetchOptions, uuidv4
@@ -343,10 +344,58 @@ const RNRasa = ({
     setMute(!mute);
   }
 
+  const _renderComposer = (props: Readonly<ComposerProps> & Readonly<{
+    children?: React.ReactNode;
+  }>) => {
+    return <View style={{ flex: 1, flexDirection: "row", alignItems: "center" }}>
+      {_recording ? <TouchableOpacity
+        onPress={onStopRecorder}
+        style={{
+          width: 40, height: 55,
+          alignItems: 'center',
+          justifyContent: 'center'
+        }}>
+        <Image
+          source={require("../Demo/stop-recorder.png")}
+          style={{
+            width: 25, height: 25, tintColor: "#0066ff",
+          }}
+        />
+      </TouchableOpacity> : <TouchableOpacity
+        onPress={onStartRecorder}
+        style={{
+          width: 40, height: 55,
+          alignItems: 'center',
+          justifyContent: 'center'
+        }}>
+        <Image
+          source={require("../Demo/microphone.png")}
+          style={{
+            width: 25, height: 25, tintColor: "#0066ff",
+          }}
+        />
+      </TouchableOpacity>}
+      <App1 ref={recorderRef}
+        onResultData={onResultData}
+        // idVoice={idVoice}
+        idVoice={null}
+        token={token}
+      />
+      {!_recording && !recorderRef.current?.state.isProcessingSpeechToText && <TextInput
+        style={[{ flex: 1 }, props.textInputStyle]}
+        placeholder={props.placeholder}
+        onChangeText={props.onTextChanged}
+        {...props.textInputProps} />}
+    </View>
+  }
+
+  const _renderFooter = () => {
+    return <View style={{ padding: 10 }}></View>
+  }
+
   const _renderVoiceRecorder = (): React.ReactNode => {
     return <View style={{
       alignItems: "center",
-      padding: 20,
       backgroundColor: "transparent"
     }}>
       <App1 ref={recorderRef}
@@ -355,7 +404,7 @@ const RNRasa = ({
         idVoice={null}
         token={token}
       />
-      {_recording ? <TouchableOpacity
+      {/* {_recording ? <TouchableOpacity
         onPress={onStopRecorder}
         style={{
           width: 70, height: 70,
@@ -385,7 +434,7 @@ const RNRasa = ({
             width: 35, height: 35, tintColor: "#fff",
           }}
         />
-      </TouchableOpacity>}
+      </TouchableOpacity>} */}
     </View>
   }
 
@@ -436,6 +485,9 @@ const RNRasa = ({
 
       <GiftedChat
         {...giftedChatProp}
+        // textInputStyle={{
+        //   paddingLeft: 30
+        // }}
         user={{
           _id: 1,
           avatar: userAvatar,
@@ -444,8 +496,43 @@ const RNRasa = ({
         messages={messages}
         onQuickReply={onQuickReply}
         onLongPress={onLongPress}
-        renderChatFooter={_renderVoiceRecorder}
+        renderChatFooter={_renderFooter}
+        renderComposer={_renderComposer}
       />
+
+      {/* {_recording ? <TouchableOpacity
+        onPress={onStopRecorder}
+        style={{
+          width: 40, height: 55,
+          position: 'absolute',
+          bottom: 0,
+          left: 0,
+          alignItems: 'center',
+          justifyContent: 'center'
+        }}>
+        <Image
+          source={require("../Demo/stop-recorder.png")}
+          style={{
+            width: 25, height: 25, tintColor: "#0066ff",
+          }}
+        />
+      </TouchableOpacity> : <TouchableOpacity
+        onPress={onStartRecorder}
+        style={{
+          width: 40, height: 55,
+          position: 'absolute',
+          bottom: 0,
+          left: 0,
+          alignItems: 'center',
+          justifyContent: 'center'
+        }}>
+        <Image
+          source={require("../Demo/microphone.png")}
+          style={{
+            width: 25, height: 25, tintColor: "#0066ff",
+          }}
+        />
+      </TouchableOpacity>} */}
     </View>
   );
 };

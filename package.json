@@ -37,6 +37,7 @@
     "react-native-sound": "^0.11.1",
     "react-native-spinkit": "^1.5.1",
     "rn-fetch-blob": "^0.12.0",
+    "stringee-react-native": "^1.4.25",
     "uuid": "^8.3.2"
   },
   "devDependencies": {
